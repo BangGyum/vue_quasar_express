@@ -1,3 +1,49 @@
-mssql과 node 연결에는 tedious가 사용됨
+<!-- mssql과 node 연결에는 tedious가 사용됨
 https://tediousjs.github.io/tedious/api-request.html#event_columnMetadata
 필요한 것은 tedious document 참고
+
+
+function executeStatement() {  
+  var request = new Request("SELECT * FROM TB_FILES;", function(err) {  
+  if (err) {  
+      console.log(err);}  
+  });  
+  var result = [];  
+  let rowResult = {};
+  let rowNum = 0;
+  
+  //let columnName = "";
+  //let columnValue = "";
+  console.log("11");
+
+  request.on('row', function(columns) {  
+    console.log(columns);
+    
+    rowNum +=1;
+    rowResult['rowNum'] = rowNum;
+    // console.log("111111111111111");
+    // console.log(columns);
+    // console.log("111111111111111");
+      columns.forEach(function(column) { 
+        console.log('forEach in');
+        if (column.value === null) {  
+          console.log('NULL');  
+        } else { 
+          let columnName = column.metadata.colName;
+          let columnValue = column.value;
+          rowResult[columnName] = columnValue;
+          
+          //console.log(column.metadata.colName); 
+          //console.log(column.value);
+          //let result2 = [];
+          //result2+= column.value + " ";  
+        }
+      });  
+      
+      console.log('columnForeach 들어왔다');
+      console.log(rowResult);
+      result.push(rowResult);
+      //result ="";  
+      //rowResult = {};
+  });  
+ -->

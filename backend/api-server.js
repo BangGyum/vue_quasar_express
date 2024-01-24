@@ -17,7 +17,8 @@ connection.on('connect', function(err) {
       console.log(err);
   } else {
       console.log("Connected");  
-      executeStatement();
+      let a = executeStatement();
+      console.log(a);
   }
 });
 
@@ -65,39 +66,58 @@ app.get('/api/test', (req, res) => {
   res.send(executeStatement());
 });
 
+app.post('/api/saveConfDo', (req, res) => {
+  
+  res.send("success")
+})
+
+function createTransaction() {
+  const sql = `INSERT INTO ${table} VALUES ('1')`;
+
+  const request = new Request(sql, (err, rowCount) => {
+    if (err) {
+      console.log('Insert failed');
+      throw err;
+    }
+
+    console.log('new Request cb');
+
+    // Call connection.beginTransaction() method in this 'new Request' call back function
+    beginTransaction();
+  });
+
+  connection.execSql(request);
+}
+
 
 function executeStatement() {  
-  let request = new Request("SELECT * FROM TB_FILES;", function(err) {  
+  var request = new Request("SELECT * FROM TB_FILES;", function(err) {  
   if (err) {  
       console.log(err);}  
   });  
-  let result = [];  
-  
+  var result = [];  
   request.on('row', function(columns) {  
+    console.log('///////////////////');
       columns.forEach(function(column) { 
         //console.log(column) ;
-        let rowResult = {}
         if (column.value === null) {  
           console.log('NULL');  
-        } else { 
-          
-          let columnName = column.metadata.colName;
-          let columnValue = column.value;
-          rowResult[columnName] = columnValue;
-          result.ap
-          //console.log(column.metadata.colName); 
-          //console.log(column.value);
-          //result+= column.value + " ";  
+        } else {  
+          console.log(column.value);
+          result+= column.value + " ";  
         }  
       });  
       console.log('여기 들어왔다');
       console.log(result);  
       //result ="";  
       return result;
+      
   });  
-
+  
+  console.log(result); 
+  
   request.on('done', function(rowCount, more) {  
-  console.log(rowCount + ' rows returned');  
+    console.log(rowCount + ' rows returned');  
   });  
   
   // Close the connection after the final event emitted by the request, after the callback passes
