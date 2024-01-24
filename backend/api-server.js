@@ -67,19 +67,27 @@ app.get('/api/test', (req, res) => {
 
 
 function executeStatement() {  
-  var request = new Request("SELECT * FROM TB_FILES;", function(err) {  
+  let request = new Request("SELECT * FROM TB_FILES;", function(err) {  
   if (err) {  
       console.log(err);}  
   });  
-  var result = [];  
+  let result = [];  
+  
   request.on('row', function(columns) {  
       columns.forEach(function(column) { 
         //console.log(column) ;
+        let rowResult = {}
         if (column.value === null) {  
           console.log('NULL');  
-        } else {  
-          console.log(column.value);
-          result+= column.value + " ";  
+        } else { 
+          
+          let columnName = column.metadata.colName;
+          let columnValue = column.value;
+          rowResult[columnName] = columnValue;
+          result.ap
+          //console.log(column.metadata.colName); 
+          //console.log(column.value);
+          //result+= column.value + " ";  
         }  
       });  
       console.log('여기 들어왔다');

@@ -1,0 +1,3 @@
+mssql과 node 연결에는 tedious가 사용됨
+https://tediousjs.github.io/tedious/api-request.html#event_columnMetadata
+필요한 것은 tedious document 참고
