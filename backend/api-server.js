@@ -6,6 +6,7 @@ const bodyParser = require('body-parser') //request를 제대로 받기 위한
 const { Connection, Request, TYPES } = require('tedious') //mssql 사용을 위해
 const app = express()
 const port = 3000
+const table = 'TB_FILES'
 
 ///////////////
 
@@ -23,6 +24,8 @@ connection.on('connect', function(err) {
 });
 
 connection.connect();
+
+app.use(express.json());
 
 // mssql DB가 연동된 라우터 모듈을 객체화
 //const { connection } = require('./db_connector');
@@ -43,8 +46,6 @@ const confObject = [
   },
 ]
 
-app.use(bodyParser.json());
-
 app.get('/api/', (req, res) => {
   res.send('Hello World!')
 })
@@ -63,16 +64,40 @@ app.listen(port, () => {
 
 app.get('/api/test', (req, res) => {
   //ensureConnection();
+  createTransaction(1,1,1,1,'34589345','uuidName','path','orginName','432543');
   res.send(executeStatement());
 });
 
-app.post('/api/saveConfDo', (req, res) => {
-  
-  res.send("success")
-})
+// app.post('/api/saveConfDo', (req, res) => {
+//   createTransaction(1,1,1,1,34589345,'uuidName','path','orginName','4325.43KB');
+//   res.send("success");
+// });
 
-function createTransaction() {
-  const sql = `INSERT INTO ${table} VALUES ('1')`;
+
+function createTransaction(boNo,boNum,boDept,boSeq,FileRegistrationNum,fileUuidName,filePath,fileOrgnName,fileSize) { //insert
+  console.log(typeof FileRegistrationNum);
+  const sql = `INSERT INTO ${table} (BO_NO
+                                    ,BO_NUM
+                                    ,BO_DEPT
+                                    ,BO_SEQ
+                                    ,FILE_REGISTRATION_NUM
+                                    ,FILE_UUID_NAME
+                                    ,FILE_PATH
+                                    ,FILE_ORGN_NAME
+                                    ,FILE_SIZE
+                                    ,FILE_DEL_YN
+                                    ) VALUES (
+                                    ${boNo}
+                                    ,${boNum}
+                                    ,${boDept}
+                                    ,${boSeq}
+                                    ,'${FileRegistrationNum}'
+                                    ,'${fileUuidName}'
+                                    ,'${filePath}'
+                                    ,'${fileOrgnName}'
+                                    ,'${fileSize}'
+                                    ,'N'
+                                    )`;
 
   const request = new Request(sql, (err, rowCount) => {
     if (err) {
@@ -88,7 +113,6 @@ function createTransaction() {
 
   connection.execSql(request);
 }
-
 
 function executeStatement() {  
   var request = new Request("SELECT * FROM TB_FILES;", function(err) {  
@@ -136,4 +160,44 @@ function ensureConnection() {
           console.log("Connected");  
       });
   }
+}
+
+// SQL: Begin Transaction
+//--------------------------------------------------------------------------------
+function beginTransaction() {
+  connection.beginTransaction((err) => {
+    if (err) {
+      // If error in begin transaction, roll back!
+      rollbackTransaction(err);
+    } else {
+      console.log('beginTransaction() done');
+      // If no error, commit transaction!
+      commitTransaction();
+    }
+  });
+}
+
+// SQL: Commit Transaction (if no errors)
+//--------------------------------------------------------------------------------
+function commitTransaction() {
+  connection.commitTransaction((err) => {
+    if (err) {
+      console.log('commit transaction err: ', err);
+    }
+    console.log('commitTransaction() done!');
+    console.log('DONE!');
+    connection.close();
+  });
+}
+
+// SQL: Rolling Back Transaction - due to errors during transaction process.
+//--------------------------------------------------------------------------------
+function rollbackTransaction(err) {
+  console.log('transaction err: ', err);
+  connection.rollbackTransaction((err) => {
+    if (err) {
+      console.log('transaction rollback error: ', err);
+    }
+  });
+  connection.close();
 }
