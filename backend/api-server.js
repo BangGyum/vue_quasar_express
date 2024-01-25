@@ -77,12 +77,20 @@ app.post("/api/saveConf/:idx", (req, res) => {
   res.send(req.params.idx);
 });
 
-// app.post('/api/saveConfDo', (req, res) => {
-//   createTransaction(1,1,1,1,34589345,'uuidName','path','orginName','4325.43KB');
-//   res.send("success");
-// });
+app.post("/api/updateConf/:idx", (req, res) => {
+  console.log(req.body.param);
+  console.log("-------------------");
+  console.log(req.body.param.confId);
+  let paramData = req.body.param;
+  updateTransaction(paramData.confId
+                    ,paramData.confValue
+                    ,paramData.confName
+                    ,paramData.confDesc
+                    ,paramData.craeteId);
+  res.send(req.params.idx);
+});
+
 function createTransaction(confId,confValue,confName,confDesc,craeteId) { //insert
-  console.log(confId);
   const sql = `INSERT INTO ${table} (CODE_ID
                                     ,CODE_VALUE
                                     ,CODE_NAME
@@ -99,6 +107,35 @@ function createTransaction(confId,confValue,confName,confDesc,craeteId) { //inse
   const request = new Request(sql, (err, rowCount) => {
     if (err) {
       console.log('Insert failed');
+      throw err;
+    }
+
+    console.log('new Request cb');
+
+    // Call connection.beginTransaction() method in this 'new Request' call back function
+    beginTransaction();
+  });
+
+  connection.execSql(request);
+}
+
+function updateTransaction(confId,confValue,confName,confDesc,craeteId) { //insert
+  console.log(confId);
+  const sql = `UPDATE TB_CONFIG  
+              SET 
+                CODE_NAME = '${confName}'
+                ,CODE_DESC = '${confDesc}'
+                ,UPDATE_DT = GETDATE()
+                ,UPDATE_ID = '${updateId}'
+              WHERE 
+                1=1
+                AND CODE_ID = '${confId}'
+                AND CODE_VALUE = '${confValue}'
+  `
+
+  const request = new Request(sql, (err, rowCount) => {
+    if (err) {
+      console.log('update failed');
       throw err;
     }
 
