@@ -1,16 +1,11 @@
-//const { connPool } = require('./server.js');
-//import { express } from 'express';
-const express = require('express')
-//import { bodyParser } from 'body-parser';
-const bodyParser = require('body-parser') //request를 제대로 받기 위한 
-const { Connection, Request, TYPES } = require('tedious') //mssql 사용을 위해
-const app = express()
-const port = 3000
-const table = 'TB_FILES'
+const express = require('express');
+const bodyParser = require('body-parser'); //request를 제대로 받기 위한 
+const { Connection, Request, TYPES } = require('tedious'); //mssql 사용을 위해
+const app = express();
+const port = 3000;
+const table = 'TB_CONFIG';
 
-///////////////
-
-const config = require('./db_config').config;
+const config = require('./db_config').config; //db정보는 따로 빼놓음.
 
 var connection = new Connection(config);  
 connection.on('connect', function(err) {
@@ -27,18 +22,12 @@ connection.connect();
 
 app.use(express.json());
 
-// mssql DB가 연동된 라우터 모듈을 객체화
-//const { connection } = require('./db_connector');
-//var Request = require('tedious').Request;  
-//var TYPES = require('tedious').TYPES;  
-
-
 const confList = ["메뉴1","메뉴2","메뉴3"];
 
 const confObject = [
   {
   name : "메뉴",
-  code : "menu",
+  code : "menu", 
   },
   {
   name : "권한",
@@ -47,56 +36,64 @@ const confObject = [
 ]
 
 app.get('/api/', (req, res) => {
-  res.send('Hello World!')
+  res.send('Hello World!');
 })
 app.get('/api/confList', (req, res) => {
-  res.send(confList)
+  res.send(confList);
 })
 app.post('/api/confObject', (req, res) => {
   
-  res.send(confObject)
+  res.send(confObject);
 })
 
+// app.get("/api/idx/:idx", (req, res) => {
+//   res.send('user ' + req.params.idx)
+// })
+//테스트용
+app.post("/api/idx/:idx", (req, res) => {
+  console.log(req.body.param);
+  res.send(req.body.param)
+});
+app.get('/api/test', (req, res) => {
+  //ensureConnection();
+  ///createTransaction(1,1,1,1,'34589345','uuidName','path','orginName','432543');
+  res.send(executeStatement());
+});
 
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`)
 })
 
-app.get('/api/test', (req, res) => {
-  //ensureConnection();
-  createTransaction(1,1,1,1,'34589345','uuidName','path','orginName','432543');
-  res.send(executeStatement());
+app.post("/api/saveConf/:idx", (req, res) => {
+  console.log(req.body.param);
+  console.log("-------------------");
+  console.log(req.body.param.confId);
+  let paramData = req.body.param;
+  createTransaction(paramData.confId
+                    ,paramData.confValue
+                    ,paramData.confName
+                    ,paramData.confDesc
+                    ,paramData.craeteId);
+  res.send(req.params.idx);
 });
 
 // app.post('/api/saveConfDo', (req, res) => {
 //   createTransaction(1,1,1,1,34589345,'uuidName','path','orginName','4325.43KB');
 //   res.send("success");
 // });
-
-
-function createTransaction(boNo,boNum,boDept,boSeq,FileRegistrationNum,fileUuidName,filePath,fileOrgnName,fileSize) { //insert
-  console.log(typeof FileRegistrationNum);
-  const sql = `INSERT INTO ${table} (BO_NO
-                                    ,BO_NUM
-                                    ,BO_DEPT
-                                    ,BO_SEQ
-                                    ,FILE_REGISTRATION_NUM
-                                    ,FILE_UUID_NAME
-                                    ,FILE_PATH
-                                    ,FILE_ORGN_NAME
-                                    ,FILE_SIZE
-                                    ,FILE_DEL_YN
+function createTransaction(confId,confValue,confName,confDesc,craeteId) { //insert
+  console.log(confId);
+  const sql = `INSERT INTO ${table} (CODE_ID
+                                    ,CODE_VALUE
+                                    ,CODE_NAME
+                                    ,CODE_DESC
+                                    ,CREATE_ID 
                                     ) VALUES (
-                                    ${boNo}
-                                    ,${boNum}
-                                    ,${boDept}
-                                    ,${boSeq}
-                                    ,'${FileRegistrationNum}'
-                                    ,'${fileUuidName}'
-                                    ,'${filePath}'
-                                    ,'${fileOrgnName}'
-                                    ,'${fileSize}'
-                                    ,'N'
+                                    '${confId}'
+                                    ,'${confValue}'
+                                    ,'${confName}'
+                                    ,'${confDesc}'
+                                    ,'${craeteId}'
                                     )`;
 
   const request = new Request(sql, (err, rowCount) => {
@@ -114,8 +111,10 @@ function createTransaction(boNo,boNum,boDept,boSeq,FileRegistrationNum,fileUuidN
   connection.execSql(request);
 }
 
+// 
+
 function executeStatement() {  
-  var request = new Request("SELECT * FROM TB_FILES;", function(err) {  
+  var request = new Request("SELECT * FROM TB_CONFIG;", function(err) {  
   if (err) {  
       console.log(err);}  
   });  
@@ -201,3 +200,43 @@ function rollbackTransaction(err) {
   });
   connection.close();
 }
+
+// function createTransaction(boNo,boNum,boDept,boSeq,FileRegistrationNum,fileUuidName,filePath,fileOrgnName,fileSize) { //insert
+//     console.log(typeof FileRegistrationNum);
+//     const sql = `INSERT INTO ${table} (BO_NO
+//                                       ,BO_NUM
+//                                       ,BO_DEPT
+//                                       ,BO_SEQ
+//                                       ,FILE_REGISTRATION_NUM
+//                                       ,FILE_UUID_NAME
+//                                       ,FILE_PATH
+//                                       ,FILE_ORGN_NAME
+//                                       ,FILE_SIZE
+//                                       ,FILE_DEL_YN
+//                                       ) VALUES (
+//                                       ${boNo}
+//                                       ,${boNum}
+//                                       ,${boDept}
+//                                       ,${boSeq}
+//                                       ,'${FileRegistrationNum}'
+//                                       ,'${fileUuidName}'
+//                                       ,'${filePath}'
+//                                       ,'${fileOrgnName}'
+//                                       ,'${fileSize}'
+//                                       ,'N'
+//                                       )`;
+  
+//     const request = new Request(sql, (err, rowCount) => {
+//       if (err) {
+//         console.log('Insert failed');
+//         throw err;
+//       }
+  
+//       console.log('new Request cb');
+  
+//       // Call connection.beginTransaction() method in this 'new Request' call back function
+//       beginTransaction();
+//     });
+  
+//     connection.execSql(request);
+//   }
