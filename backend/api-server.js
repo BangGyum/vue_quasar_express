@@ -64,10 +64,8 @@ app.listen(port, () => {
   console.log(`Example app listening on port ${port}`)
 })
 
+//테스트 확인
 app.post("/api/saveConf/:idx", (req, res) => {
-  console.log(req.body.param);
-  console.log("-------------------");
-  console.log(req.body.param.confId);
   let paramData = req.body.param;
   createTransaction(paramData.confId
                     ,paramData.confValue
@@ -77,16 +75,10 @@ app.post("/api/saveConf/:idx", (req, res) => {
   res.send(req.params.idx);
 });
 
-app.post("/api/updateConf/:idx", (req, res) => {
-  console.log(req.body.param);
-  console.log("-------------------");
-  console.log(req.body.param.confId);
-  let paramData = req.body.param;
-  updateTransaction(paramData.confId
-                    ,paramData.confValue
-                    ,paramData.confName
-                    ,paramData.confDesc
-                    ,paramData.craeteId);
+app.post("/api/getConfig/:idx", (req, res) => {
+  let paramData = req.body.testParam;
+  selectEach(paramData.confId
+            ,paramData.confValue);
   res.send(req.params.idx);
 });
 
@@ -150,10 +142,11 @@ function updateTransaction(confId,confValue,confName,confDesc,craeteId) { //inse
 
 // 
 
-function executeStatement() {  
+function executeStatement() {
   var request = new Request("SELECT * FROM TB_CONFIG;", function(err) {  
   if (err) {  
-      console.log(err);}  
+      console.log(err); 
+  }
   });  
   var result = [];  
   request.on('row', function(columns) {  
@@ -186,7 +179,46 @@ function executeStatement() {
   });
   connection.execSql(request);  
   
-}  
+}
+
+function selectEach(confId,confValue) {
+  console.log(confId);
+  const request = new Request(`select * from TB_CONFIG
+                              WHERE 1=1
+                              AND CODE_ID = '${confId}'
+                              AND CODE_VALUE = '${confValue}'`, (err, rowCount) => {
+    if (err) {
+      throw err;
+    }
+    console.log('DONE!');
+    connection.close();
+  });
+  let result = [];
+  // Emits a 'DoneInProc' event when completed.
+  request.on('row', (columns) => {
+    columns.forEach((column) => {
+      if (column.value === null) {
+        console.log('NULL');
+      } else {
+        console.log(column.value);
+        result+= column.value + " ";
+      }
+    });
+  });
+
+  request.on('done', (rowCount) => {
+    console.log('Done is called!');
+  });
+
+  request.on('doneInProc', (rowCount, more) => {
+    console.log(rowCount + ' rows returned');
+  });
+
+  // In SQL Server 2000 you may need: connection.execSqlBatch(request);
+  connection.execSql(request);
+
+  return result;
+}
 
 function ensureConnection() {
   if (!connection || connection.state === 'Final') {
