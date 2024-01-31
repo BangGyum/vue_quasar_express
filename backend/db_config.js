@@ -11,7 +11,8 @@ var config = {
         // If you are on Microsoft Azure, you need encryption:
         //encrypt: true,
         database: 'AINFRAMEWORK',  //update me
-        trustServerCertificate: true
+        trustServerCertificate: true , //"true"인 경우 통신 계층이 SSL을 사용하여
+                                // 암호화될 때 SQL Server SSL 인증서가 자동으로 신뢰됩니다.
         //trustServerCertificate: true // add this line
 
     }

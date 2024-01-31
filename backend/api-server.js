@@ -53,9 +53,6 @@ app.post('/api/confList', (req, res) => {
   res.send(confList);
 })
 
-// app.get("/api/idx/:idx", (req, res) => {
-//   res.send('user ' + req.params.idx)
-// })
 //테스트용
 app.post("/api/idx/:idx", (req, res) => {
   console.log(req.body.param);
@@ -143,28 +140,10 @@ function updateTransaction(confId,confValue,confName,confDesc,craeteId) { //inse
   connection.execSql(request);
 }
 
-// 
-
-// SELECT 쿼리 실행 함수
-function executeSelectQuery(query, callback) {
-  let request = new Request(query, function(err, rowCount, rows) {
-    if (err) {
-      console.log(err);
-    } else {
-      callback(null, rows);
-    }
-  });
-
-  connection.execSql(request);
-}
-
-
-
-// console.log(executeSelectQuery());
 app.get('/api/test', async (req, res) => {
   try {
-    const result = await executeStatement();
-    console.log(result);
+    const result = await executeSelectQuery();
+    //console.log(result);
     res.json(result);
   } catch (err) {
     console.error(err);
@@ -172,7 +151,7 @@ app.get('/api/test', async (req, res) => {
   }
 });
 
-function executeStatement() {
+function executeSelectQuery() {
   return new Promise((resolve, reject) => {
     var request = new Request("SELECT * FROM TB_CONFIG;", function(err) {  
       if (err) {  
@@ -198,10 +177,10 @@ function executeStatement() {
       resolve(result); 
     });
 
-    connection.execSql(request);
+    connection.execSql(request); //sql 보내기
   });
 }
-
+//수정 예정
 function selectEach(confId,confValue) {
   console.log(confId);
   const request = new Request(`select * from TB_CONFIG
