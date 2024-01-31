@@ -13,8 +13,8 @@ connection.on('connect', function(err) {
       console.log(err);
   } else {
       console.log("Connected");  
-      let a = executeStatement();
-      console.log(a);
+      // let a = executeStatement();
+      // console.log(a);
   }
 });
 
@@ -22,7 +22,9 @@ connection.connect();
 
 app.use(express.json());
 
-const confList = ["메뉴1","메뉴2","메뉴3"];
+const confList = [{name : "공통코드1", id : "1"}
+                 ,{name : "공통코드2", id : "2"}];
+confList.push({name : "공통코드3", id : 3})
 
 const confObject = [
   {
@@ -38,12 +40,17 @@ const confObject = [
 app.get('/api/', (req, res) => {
   res.send('Hello World!');
 })
-app.get('/api/confList', (req, res) => {
-  res.send(confList);
-})
+// app.get('/api/confList', (req, res) => {
+//   res.send(confList);
+// })
 app.post('/api/confObject', (req, res) => {
   
   res.send(confObject);
+})
+
+app.post('/api/confList', (req, res) => {
+  
+  res.send(confList);
 })
 
 // app.get("/api/idx/:idx", (req, res) => {
@@ -54,11 +61,7 @@ app.post("/api/idx/:idx", (req, res) => {
   console.log(req.body.param);
   res.send(req.body.param)
 });
-app.get('/api/test', (req, res) => {
-  //ensureConnection();
-  ///createTransaction(1,1,1,1,'34589345','uuidName','path','orginName','432543');
-  res.send(executeStatement());
-});
+
 
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`)
@@ -142,43 +145,61 @@ function updateTransaction(confId,confValue,confName,confDesc,craeteId) { //inse
 
 // 
 
-function executeStatement() {
-  var request = new Request("SELECT * FROM TB_CONFIG;", function(err) {  
-  if (err) {  
-      console.log(err); 
-  }
-  });  
-  var result = [];  
-  request.on('row', function(columns) {  
-    console.log('///////////////////');
-      columns.forEach(function(column) { 
-        //console.log(column) ;
-        if (column.value === null) {  
-          console.log('NULL');  
-        } else {  
-          console.log(column.value);
-          result+= column.value + " ";  
-        }  
-      });  
-      console.log('여기 들어왔다');
-      console.log(result);  
-      //result ="";  
-      return result;
-      
-  });  
-  
-  console.log(result); 
-  
-  request.on('done', function(rowCount, more) {  
-    console.log(rowCount + ' rows returned');  
-  });  
-  
-  // Close the connection after the final event emitted by the request, after the callback passes
-  request.on("requestCompleted", function (rowCount, more) {
-      //connection.close();
+// SELECT 쿼리 실행 함수
+function executeSelectQuery(query, callback) {
+  let request = new Request(query, function(err, rowCount, rows) {
+    if (err) {
+      console.log(err);
+    } else {
+      callback(null, rows);
+    }
   });
-  connection.execSql(request);  
-  
+
+  connection.execSql(request);
+}
+
+
+
+// console.log(executeSelectQuery());
+app.get('/api/test', async (req, res) => {
+  try {
+    const result = await executeStatement();
+    console.log(result);
+    res.json(result);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Server error');
+  }
+});
+
+function executeStatement() {
+  return new Promise((resolve, reject) => {
+    var request = new Request("SELECT * FROM TB_CONFIG;", function(err) {  
+      if (err) {  
+        reject(err); 
+      }
+    });  
+
+    var result = []; 
+    let colData = {}; 
+
+    request.on('row', function(columns) {  
+      columns.forEach(function(column) { 
+        let colName = column.metadata.colName;
+        let colValue = column.value;
+        colData[colName] = colValue !== null ? colValue : 'NULL';
+      });  
+
+      result.push(colData);
+      colData = {}; 
+    });  
+
+    request.on('requestCompleted', function() {
+      resolve(result); 
+    });
+
+    connection.execSql(request);
+  });
 }
 
 function selectEach(confId,confValue) {
