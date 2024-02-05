@@ -53,11 +53,11 @@ app.post('/api/codeList', (req, res) => {
   res.send(codeList);
 })
 
-//테스트용
-app.post("/api/idx/:idx", (req, res) => {
-  console.log(req.body.param);
-  res.send(req.body.param)
-});
+// //테스트용
+// app.post("/api/idx/:idx", (req, res) => {
+//   console.log(req.body.param);
+//   res.send(req.body.param)
+// });
 
 
 app.listen(port, () => {
