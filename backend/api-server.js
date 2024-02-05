@@ -22,11 +22,11 @@ connection.connect();
 
 app.use(express.json());
 
-const confList = [{name : "공통코드1", id : "1"}
+const codeList = [{name : "공통코드1", id : "1"}
                  ,{name : "공통코드2", id : "2"}];
-confList.push({name : "공통코드3", id : 3})
+codeList.push({name : "공통코드3", id : 3})
 
-const confObject = [
+const codeObject = [
   {
   name : "메뉴",
   code : "menu", 
@@ -43,14 +43,14 @@ app.get('/api/', (req, res) => {
 // app.get('/api/confList', (req, res) => {
 //   res.send(confList);
 // })
-app.post('/api/confObject', (req, res) => {
+app.post('/api/codeObject', (req, res) => {
   
-  res.send(confObject);
+  res.send(codeObject);
 })
 
-app.post('/api/confList', (req, res) => {
+app.post('/api/codeList', (req, res) => {
   
-  res.send(confList);
+  res.send(codeList);
 })
 
 //테스트용
@@ -65,34 +65,34 @@ app.listen(port, () => {
 })
 
 //테스트 확인
-app.post("/api/saveConf/:idx", (req, res) => {
+app.post("/api/saveCode/:idx", (req, res) => {
   let paramData = req.body.param;
-  createTransaction(paramData.confId
-                    ,paramData.confValue
-                    ,paramData.confName
-                    ,paramData.confDesc
+  createTransaction(paramData.codeId
+                    ,paramData.codeValue
+                    ,paramData.codeName
+                    ,paramData.codeDesc
                     ,paramData.craeteId);
   res.send(req.params.idx);
 });
 
 app.post("/api/getConfig/:idx", (req, res) => {
   let paramData = req.body.testParam;
-  selectEach(paramData.confId
-            ,paramData.confValue);
+  selectEach(paramData.codeId
+            ,paramData.codeValue);
   res.send(req.params.idx);
 });
 
-function createTransaction(confId,confValue,confName,confDesc,craeteId) { //insert
+function createTransaction(codeId,codeValue,codeName,codeDesc,craeteId) { //insert
   const sql = `INSERT INTO ${table} (CODE_ID
                                     ,CODE_VALUE
                                     ,CODE_NAME
                                     ,CODE_DESC
                                     ,CREATE_ID 
                                     ) VALUES (
-                                    '${confId}'
-                                    ,'${confValue}'
-                                    ,'${confName}'
-                                    ,'${confDesc}'
+                                    '${codeId}'
+                                    ,'${codeValue}'
+                                    ,'${codeName}'
+                                    ,'${codeDesc}'
                                     ,'${craeteId}'
                                     )`;
 
@@ -111,18 +111,18 @@ function createTransaction(confId,confValue,confName,confDesc,craeteId) { //inse
   connection.execSql(request);
 }
 
-function updateTransaction(confId,confValue,confName,confDesc,craeteId) { //insert
-  console.log(confId);
+function updateTransaction(codeId,codeValue,codeName,codeDesc,craeteId) { //insert
+  console.log(codeId);
   const sql = `UPDATE TB_CONFIG  
               SET 
-                CODE_NAME = '${confName}'
-                ,CODE_DESC = '${confDesc}'
+                CODE_NAME = '${codeName}'
+                ,CODE_DESC = '${codeDesc}'
                 ,UPDATE_DT = GETDATE()
                 ,UPDATE_ID = '${updateId}'
               WHERE 
                 1=1
-                AND CODE_ID = '${confId}'
-                AND CODE_VALUE = '${confValue}'
+                AND CODE_ID = '${codeId}'
+                AND CODE_VALUE = '${codeValue}'
   `
 
   const request = new Request(sql, (err, rowCount) => {
@@ -181,12 +181,12 @@ function executeSelectQuery() {
   });
 }
 //수정 예정
-function selectEach(confId,confValue) {
-  console.log(confId);
+function selectEach(codeId,codeValue) {
+  console.log(codeId);
   const request = new Request(`select * from TB_CONFIG
                               WHERE 1=1
-                              AND CODE_ID = '${confId}'
-                              AND CODE_VALUE = '${confValue}'`, (err, rowCount) => {
+                              AND CODE_ID = '${codeId}'
+                              AND CODE_VALUE = '${codeValue}'`, (err, rowCount) => {
     if (err) {
       throw err;
     }
