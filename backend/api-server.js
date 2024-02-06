@@ -40,9 +40,7 @@ const codeObject = [
 app.get('/api/', (req, res) => {
   res.send('Hello World!');
 })
-// app.get('/api/confList', (req, res) => {
-//   res.send(confList);
-// })
+
 app.post('/api/codeObject', (req, res) => {
   
   res.send(codeObject);
@@ -52,13 +50,6 @@ app.post('/api/codeList', (req, res) => {
   
   res.send(codeList);
 })
-
-// //테스트용
-// app.post("/api/idx/:idx", (req, res) => {
-//   console.log(req.body.param);
-//   res.send(req.body.param)
-// });
-
 
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`)
@@ -140,9 +131,34 @@ function updateTransaction(codeId,codeValue,codeName,codeDesc,craeteId) { //inse
   connection.execSql(request);
 }
 
-app.get('/api/test', async (req, res) => {
+// app.get('/api/test', async (req, res) => {
+//   try {
+//     const result = await executeSelectQuery("SELECT * FROM TB_CONFIG;");
+//     //console.log(result);
+//     res.json(result);
+//   } catch (err) {
+//     console.error(err);
+//     res.status(500).send('Server error');
+//   }
+// });
+
+app.post('/api/data', async (req, res) => {
+  console.log('진입');
+  console.log(req.params);
+  const { page, pageSize, sortOrder } = req.params;
+  const offset = (page - 1) * pageSize;
+  //const order = `${sortField} ${sortOrder.toUpperCase()}`;
+  //const filter = `${filterField} LIKE '%${filterValue}%'`;
+  
+  //      WHERE ${filter} 
   try {
-    const result = await executeSelectQuery();
+    const result = await executeSelectQuery(
+      `SELECT 
+      * FROM TB_CONFIG
+
+      ORDER BY ${sortOrder} 
+      OFFSET ${offset} rows
+      FETCH NEXT ${pageSize} rows only`);
     //console.log(result);
     res.json(result);
   } catch (err) {
@@ -151,9 +167,9 @@ app.get('/api/test', async (req, res) => {
   }
 });
 
-function executeSelectQuery() {
+function executeSelectQuery(sql) {
   return new Promise((resolve, reject) => {
-    var request = new Request("SELECT * FROM TB_CONFIG;", function(err) {  
+    var request = new Request(sql, function(err) {  
       if (err) {  
         reject(err); 
       }
@@ -269,43 +285,3 @@ function rollbackTransaction(err) {
   });
   connection.close();
 }
-
-// function createTransaction(boNo,boNum,boDept,boSeq,FileRegistrationNum,fileUuidName,filePath,fileOrgnName,fileSize) { //insert
-//     console.log(typeof FileRegistrationNum);
-//     const sql = `INSERT INTO ${table} (BO_NO
-//                                       ,BO_NUM
-//                                       ,BO_DEPT
-//                                       ,BO_SEQ
-//                                       ,FILE_REGISTRATION_NUM
-//                                       ,FILE_UUID_NAME
-//                                       ,FILE_PATH
-//                                       ,FILE_ORGN_NAME
-//                                       ,FILE_SIZE
-//                                       ,FILE_DEL_YN
-//                                       ) VALUES (
-//                                       ${boNo}
-//                                       ,${boNum}
-//                                       ,${boDept}
-//                                       ,${boSeq}
-//                                       ,'${FileRegistrationNum}'
-//                                       ,'${fileUuidName}'
-//                                       ,'${filePath}'
-//                                       ,'${fileOrgnName}'
-//                                       ,'${fileSize}'
-//                                       ,'N'
-//                                       )`;
-  
-//     const request = new Request(sql, (err, rowCount) => {
-//       if (err) {
-//         console.log('Insert failed');
-//         throw err;
-//       }
-  
-//       console.log('new Request cb');
-  
-//       // Call connection.beginTransaction() method in this 'new Request' call back function
-//       beginTransaction();
-//     });
-  
-//     connection.execSql(request);
-//   }
