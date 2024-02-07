@@ -102,20 +102,52 @@ function createTransaction(codeId,codeValue,codeName,codeDesc,craeteId) { //inse
   connection.execSql(request);
 }
 
-function updateTransaction(codeId,codeValue,codeName,codeDesc,craeteId) { //insert
-  console.log(codeId);
+app.post("/api/updateCode", async (req, res) => {
+  console.log(req.body.param);
+  let paramData = req.body.param;
   const sql = `UPDATE TB_CONFIG  
               SET 
-                CODE_NAME = '${codeName}'
-                ,CODE_DESC = '${codeDesc}'
+                CODE_NAME = '${paramData.codeName}'
+                ,CODE_DESC = '${paramData.codeDesc}'
                 ,UPDATE_DT = GETDATE()
-                ,UPDATE_ID = '${updateId}'
+                ,UPDATE_ID = '${paramData.updateId}'
               WHERE 
                 1=1
-                AND CODE_ID = '${codeId}'
-                AND CODE_VALUE = '${codeValue}'
+                AND CODE_ID = '${paramData.codeId}'
+                AND CODE_VALUE = '${paramData.codeValue}'
   `
+  try {
+    configUpdate(sql);
+    res.send('성공');
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Server error');
+  }
+});
 
+
+app.post("/api/deleteCode", async (req, res) => {
+  console.log(req.body.param);
+  let paramData = req.body.param;
+  const sql = `UPDATE TB_CONFIG  
+              SET 
+                DEL_YN='Y'
+              WHERE 
+                1=1
+                AND CODE_ID = '${paramData.codeId}'
+                AND CODE_VALUE = '${paramData.codeValue}'
+  `
+  try {
+    configUpdate(sql);
+    res.send('성공');
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Server error');
+  }
+});
+
+function configUpdate(sql) { //insert
+  console.log(sql);
   const request = new Request(sql, (err, rowCount) => {
     if (err) {
       console.log('update failed');
@@ -221,7 +253,7 @@ function selectEach(codeId,codeValue) {
       throw err;
     }
     console.log('DONE!');
-    connection.close();
+    //connection.close();
   });
   let result = [];
   // Emits a 'DoneInProc' event when completed.
@@ -284,7 +316,7 @@ function commitTransaction() {
     }
     console.log('commitTransaction() done!');
     console.log('DONE!');
-    connection.close();
+    //connection.close();
   });
 }
 
@@ -297,5 +329,5 @@ function rollbackTransaction(err) {
       console.log('transaction rollback error: ', err);
     }
   });
-  connection.close();
+  //connection.close();
 }
