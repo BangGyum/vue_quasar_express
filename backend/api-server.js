@@ -131,22 +131,36 @@ function updateTransaction(codeId,codeValue,codeName,codeDesc,craeteId) { //inse
   connection.execSql(request);
 }
 
-// app.get('/api/test', async (req, res) => {
-//   try {
-//     const result = await executeSelectQuery("SELECT * FROM TB_CONFIG;");
-//     //console.log(result);
-//     res.json(result);
-//   } catch (err) {
-//     console.error(err);
-//     res.status(500).send('Server error');
-//   }
-// });
+app.get('/api/getConfigCount', async (req, res) => {
+  console.log('getCount진입');
+  console.log(req.body.params);
+  try {
+    const result = await executeSelectQuery("SELECT COUNT(1) AS COUNT FROM TB_CONFIG;");
+    console.log(result);
+    res.json(result);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Server error');
+  }
+});
+
+app.get('/api/test', async (req, res) => {
+  try {
+    const result = await executeSelectQuery("SELECT * FROM TB_CONFIG;");
+    //console.log(result);
+    res.json(result);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Server error');
+  }
+});
 
 app.post('/api/data', async (req, res) => {
   console.log('진입');
-  console.log(req.params);
-  const { page, pageSize, sortOrder } = req.params;
+  console.log(req.body.params);
+  const { page, pageSize, sortOrder } = req.body.params;
   const offset = (page - 1) * pageSize;
+  console.log('offset : '+offset);
   //const order = `${sortField} ${sortOrder.toUpperCase()}`;
   //const filter = `${filterField} LIKE '%${filterValue}%'`;
   
@@ -159,7 +173,7 @@ app.post('/api/data', async (req, res) => {
       ORDER BY ${sortOrder} 
       OFFSET ${offset} rows
       FETCH NEXT ${pageSize} rows only`);
-    //console.log(result);
+    console.log(result);
     res.json(result);
   } catch (err) {
     console.error(err);
