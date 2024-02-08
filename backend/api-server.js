@@ -188,10 +188,10 @@ app.get('/api/test', async (req, res) => {
 });
 
 app.post('/api/data', async (req, res) => {
-  console.log('진입');
+  console.log('------------------------------------------------------------진입');
   console.log(req.body.params);
-  const { page, pageSize, sortOrder } = req.body.params;
-  const offset = (page - 1) * pageSize;
+  const { page, startRow, rowsPerPage, sortOrder } = req.body.params;
+  const offset = (page - 1) * rowsPerPage;
   console.log('offset : '+offset);
   //const order = `${sortField} ${sortOrder.toUpperCase()}`;
   //const filter = `${filterField} LIKE '%${filterValue}%'`;
@@ -203,8 +203,8 @@ app.post('/api/data', async (req, res) => {
       * FROM TB_CONFIG
 
       ORDER BY ${sortOrder} 
-      OFFSET ${offset} rows
-      FETCH NEXT ${pageSize} rows only`);
+      OFFSET ${startRow} rows
+      FETCH NEXT ${rowsPerPage} rows only`);
     console.log(result);
     res.json(result);
   } catch (err) {
@@ -214,6 +214,7 @@ app.post('/api/data', async (req, res) => {
 });
 
 function executeSelectQuery(sql) {
+  console.log(sql);
   return new Promise((resolve, reject) => {
     var request = new Request(sql, function(err) {  
       if (err) {  
