@@ -131,6 +131,27 @@ app.post("/api/deleteCode", async (req, res) => {
   let paramData = req.body.param;
   const sql = `UPDATE TB_CONFIG  
               SET 
+                DEL_YN = 'Y'
+              WHERE 
+                1=1
+                AND CODE_ID = '${paramData.codeId}'
+                AND CODE_VALUE = '${paramData.codeValue}'
+  `
+  try {
+    configUpdate(sql);
+    res.send('성공');
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Server error');
+  }
+});
+
+
+app.post("/api/deleteCode", async (req, res) => {
+  console.log(req.body.param);
+  let paramData = req.body.param;
+  const sql = `UPDATE TB_CONFIG  
+              SET 
                 DEL_YN='Y'
               WHERE 
                 1=1
@@ -201,11 +222,13 @@ app.post('/api/data', async (req, res) => {
     const result = await executeSelectQuery(
       `SELECT 
       * FROM TB_CONFIG
-
+      WHERE
+        1=1
+        AND DEL_YN='N'
       ORDER BY ${sortBy} ${descending}
       OFFSET ${startRow} rows
       FETCH NEXT ${rowsPerPage} rows only`);
-    console.log(result);
+    //console.log(result);
     res.json(result);
   } catch (err) {
     console.error(err);
@@ -263,7 +286,7 @@ function selectEach(codeId,codeValue) {
       if (column.value === null) {
         console.log('NULL');
       } else {
-        console.log(column.value);
+        //console.log(column.value);
         result+= column.value + " ";
       }
     });
