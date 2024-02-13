@@ -190,7 +190,7 @@ app.get('/api/test', async (req, res) => {
 app.post('/api/data', async (req, res) => {
   console.log('------------------------------------------------------------진입');
   console.log(req.body.params);
-  const { page, startRow, rowsPerPage, sortOrder } = req.body.params;
+  const { page, startRow, rowsPerPage, sortBy, descending} = req.body.params;
   const offset = (page - 1) * rowsPerPage;
   console.log('offset : '+offset);
   //const order = `${sortField} ${sortOrder.toUpperCase()}`;
@@ -202,7 +202,7 @@ app.post('/api/data', async (req, res) => {
       `SELECT 
       * FROM TB_CONFIG
 
-      ORDER BY ${sortOrder} 
+      ORDER BY ${sortBy} ${descending}
       OFFSET ${startRow} rows
       FETCH NEXT ${rowsPerPage} rows only`);
     console.log(result);
