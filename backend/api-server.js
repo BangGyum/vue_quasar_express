@@ -4,6 +4,11 @@ const { Connection, Request, TYPES } = require('tedious'); //mssql 사용을 위
 const app = express();
 const port = 3000;
 const table = 'TB_CONFIG';
+const exceljs = require('exceljs');
+const path = require('path');
+const fs = require('fs').promises;
+const libre = require('libreoffice-convert');
+libre.convertAsync = require('util').promisify(libre.convert);
 
 const config = require('./db_config').config; //db정보는 따로 빼놓음.
 
@@ -355,3 +360,13 @@ function rollbackTransaction(err) {
   });
   //connection.close();
 }
+
+
+app.get('/pdf', async (req, res) => {
+  const ext = 'pdf'; // Output extension.
+	const inputPath = path.join(__dirname, '/shipment.xlsx');
+	const outputPath = path.join(__dirname, `/example.${ext}`);
+
+	// Read the input file.
+	const xlsxBuf = await fs.readFile(inputPath);
+});
