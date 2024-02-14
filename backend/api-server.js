@@ -369,4 +369,13 @@ app.get('/pdf', async (req, res) => {
 
 	// Read the input file.
 	const xlsxBuf = await fs.readFile(inputPath);
+
+  //여기에서는 Excel 문서의 내용(in )을 PDF 형식으로 변환하는 방법을 사용했습니다.
+  // 세 번째 인수는 왼쪽입니다. 
+  //LibreOffice은(는) 입력 및 출력 형식에 따라 적합한 필터를 자동으로 선택합니다.
+  //libre.convertAsyncxlsxBuffilterundefined
+  let pdfBuf = await libre.convertAsync(xlsxBuf, ext, undefined);
+
+  // Save the converted PDF.
+	await fs.writeFile(outputPath, pdfBuf);
 });
