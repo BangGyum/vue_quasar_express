@@ -4,16 +4,7 @@ const { Connection, Request, TYPES } = require('tedious'); //mssql 사용을 위
 const app = express();
 const port = 3000;
 const table = 'TB_CONFIG';
-const exceljs = require('exceljs');
-const path = require('path');
-const fs = require('fs').promises;
-const libre = require('libreoffice-convert');
-libre.convertAsync = require('util').promisify(libre.convert);
 
-const pdfMake = require('pdfmake/build/pdfmake.js');
-//const puppeteerVar = require('puppeteer')
-// var xlsx2 = require("xlsx")
-// var fs2 = require('fs')
 
 const config = require('./db_config').config; //db정보는 따로 빼놓음.
 
@@ -491,3 +482,13 @@ app.get('/pdf3', (req, res) => {//버튼 id pdfmake 발생시 행동할 이벤�
     var pdf_name = 'pdf파일 만들기.pdf'; // pdf 만들 파일의 이름 
     pdfMake.createPdf(documentDefinition).download(pdf_name);
   });
+  //const exceljs = require('exceljs');
+// const path = require('path');
+// const fs = require('fs').promises;
+// const libre = require('libreoffice-convert');
+// libre.convertAsync = require('util').promisify(libre.convert);
+
+//const pdfMake = require('pdfmake/build/pdfmake.js');
+//const puppeteerVar = require('puppeteer')
+// var xlsx2 = require("xlsx")
+// var fs2 = require('fs')
