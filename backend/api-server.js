@@ -212,13 +212,15 @@ app.get('/api/test', async (req, res) => {
 app.post('/api/data', async (req, res) => {
   console.log('------------------------------------------------------------진입');
   console.log(req.body.params);
-  const { page, startRow, rowsPerPage, sortBy, descending} = req.body.params;
+  const { page, startRow, rowsPerPage, sortBy, descendingFinal
+      , filterName, filterValue} = req.body.params;
   const offset = (page - 1) * rowsPerPage;
-  console.log('offset : '+offset);
-  //const order = `${sortField} ${sortOrder.toUpperCase()}`;
-  //const filter = `${filterField} LIKE '%${filterValue}%'`;
-  
-  //      WHERE ${filter} 
+  console.log('filterName : '+filterName);
+  console.log('filterValue : '+filterValue);
+  let filterQuery = '';
+  if (filterName && filterValue) {
+  filterQuery = `AND ${filterName} LIKE '%${filterValue}%'`;
+  }
   try {
     const result = await executeSelectQuery(
       `SELECT 
@@ -226,7 +228,8 @@ app.post('/api/data', async (req, res) => {
       WHERE
         1=1
         AND DEL_YN='N'
-      ORDER BY ${sortBy} ${descending}
+        ${filterQuery}
+      ORDER BY ${sortBy} ${descendingFinal}
       OFFSET ${startRow} rows
       FETCH NEXT ${rowsPerPage} rows only`);
     //console.log(result);
@@ -236,6 +239,7 @@ app.post('/api/data', async (req, res) => {
     res.status(500).send('Server error');
   }
 });
+//여기에 검색 조건으로 filterColName과 filterColValue 가 들어올건데, 그걸 반복문으로 where절에 어떻게 넣으면 좋을까 
 
 function executeSelectQuery(sql) {
   console.log(sql);
@@ -357,131 +361,6 @@ function rollbackTransaction(err) {
   //connection.close();
 }
 
-
-app.get('/pdf', async (req, res) => {
-  const ext = 'pdf'; // Output extension.
-	const inputPath = path.join(__dirname, '/shipment.xlsx');
-	const outputPath = path.join(__dirname, `/example.${ext}`);
-
-	// Read the input file.
-	const xlsxBuf = await fs.readFile(inputPath);
-
-  //여기에서는 Excel 문서의 내용(in )을 PDF 형식으로 변환하는 방법을 사용했습니다.
-  // 세 번째 인수는 왼쪽입니다. 
-  //LibreOffice은(는) 입력 및 출력 형식에 따라 적합한 필터를 자동으로 선택합니다.
-  //libre.convertAsyncxlsxBuffilterundefined
-  let pdfBuf = await libre.convertAsync(xlsxBuf, ext, undefined);
-
-  // Save the converted PDF.
-	await fs.writeFile(outputPath, pdfBuf);
-});
-app.get('/pdf2', async (req, res) => {
-  ('Test Case : Convert Excel To PDF', async function(){
-      const browser = await puppeteerVar.launch({headless:true, slowMo:500})
-      const page = await browser.newPage();
-      var dataPathExcelToRead = "Sample.xlsx"
-      var wb = xlsx.readFile(dataPathExcelToRead)
-      var sheetName = wb.SheetNames[0]
-      var sheetValue = wb.Sheets[sheetName]
-      var htmlData = xlsx.utils.sheet_to_html(sheetValue)
-      fs.writeFile('excelToHtml.html',htmlData,function(err){
-          console.log("Data is successfully converted")
-      })
-      await page.waitForTimeout(3000)
-      await page.goto('C:/Users/Azhar/Desktop/Puppeteer%20Project/excelToHtml.html',{"waitUntil":"networkidle2"}).catch(function(){
-          console.log("Error while loading the file")
-      })
-      await page.waitForTimeout(3000)
-      await page.pdf({path:'./ExcelToPDF.pdf',format:'A4',printBackground:true});
-      await browser.close()
-  });
-});
-
-app.get('/pdf3', (req, res) => {//버튼 id pdfmake 발생시 행동할 이벤트
-        
-    /* documentDefinition : pdf파일에 들어갈 내용 및 여러가지를 정의 */
-    var documentDefinition = {
-        
-        //content : pdf의 내용을 정의 
-        content: [
-            {
-                text: 'First paragraph'
-            }, // 스타일 적용 없이 그냥 출력
-            {
-                text: 'Another paragraph, this time a little bit longer to make sure, this line will be divided into at least two lines',
-                bold: true
-            }, // 텍스트에 bold 주기
-            {
-                text: '가나다라마바사아자타카타파하',
-                style: 'style_test'
-            }, // style 부분에 정의된 style_test 적용해보기 및 한글 꺠짐 테스트 
-            {
-                style: 'tableExample',
-                table: {
-                    widths: [100, '*', 200, '*'],
-                    body: [
-                        ['width=100', 'star-sized', 'width=200', 'star-sized'],
-                        ['fixed-width cells have exactly the specified width', {
-                            text: 'nothing interesting here',
-                            italics: true,
-                            color: 'gray'
-                        }, {
-                            text: 'nothing interesting here',
-                            italics: true,
-                            color: 'gray'
-                        }, {
-                            text: 'nothing interesting here',
-                            italics: true,
-                            color: 'gray'
-                        }]
-                    ]
-                }
-            }//테이블 그리기 
-        ],
-        //하단의 현재페이지 / 페이지 수 넣기 
-        footer: function (currentPage, pageCount) {
-            return {
-                margin: 10,
-                columns: [{
-                    fontSize: 9,
-                    text: [{
-                            text: '--------------------------------------------------------------------------' +
-                                '\n',
-                            margin: [0, 20]
-                        },
-                        {
-                            text: '' + currentPage.toString() + ' of ' +
-                                pageCount,
-                        }
-                    ],
-                    alignment: 'center'
-                }]
-            };
-
-        },
-        //필요한 스타일 정의하기 
-        styles: {
-            style_test: {
-                fontSize: 18,
-                bold: true,
-                margin: [0, 0, 0, 0],
-                alignment: 'center'
-            },
-            tableExample: {
-                margin: [0, 5, 0, 15]
-            }
-        },
-
-        // 페이지 크기 용지의 크기 사이즈 넣기 또는 특정 사이즈 넣기 { width: number, height: number }
-        pageSize: 'A4',
-
-        /* 페이지 방향 portrait : 가로 , landscape : 세로 */
-        pageOrientation: 'portrait',
-    };
-
-    var pdf_name = 'pdf파일 만들기.pdf'; // pdf 만들 파일의 이름 
-    pdfMake.createPdf(documentDefinition).download(pdf_name);
-  });
   //const exceljs = require('exceljs');
 // const path = require('path');
 // const fs = require('fs').promises;
@@ -492,3 +371,127 @@ app.get('/pdf3', (req, res) => {//버튼 id pdfmake 발생시 행동할 이벤�
 //const puppeteerVar = require('puppeteer')
 // var xlsx2 = require("xlsx")
 // var fs2 = require('fs')
+// app.get('/pdf', async (req, res) => {
+//   const ext = 'pdf'; // Output extension.
+// 	const inputPath = path.join(__dirname, '/shipment.xlsx');
+// 	const outputPath = path.join(__dirname, `/example.${ext}`);
+
+// 	// Read the input file.
+// 	const xlsxBuf = await fs.readFile(inputPath);
+
+//   //여기에서는 Excel 문서의 내용(in )을 PDF 형식으로 변환하는 방법을 사용했습니다.
+//   // 세 번째 인수는 왼쪽입니다. 
+//   //LibreOffice은(는) 입력 및 출력 형식에 따라 적합한 필터를 자동으로 선택합니다.
+//   //libre.convertAsyncxlsxBuffilterundefined
+//   let pdfBuf = await libre.convertAsync(xlsxBuf, ext, undefined);
+
+//   // Save the converted PDF.
+// 	await fs.writeFile(outputPath, pdfBuf);
+// });
+// app.get('/pdf2', async (req, res) => {
+//   ('Test Case : Convert Excel To PDF', async function(){
+//       const browser = await puppeteerVar.launch({headless:true, slowMo:500})
+//       const page = await browser.newPage();
+//       var dataPathExcelToRead = "Sample.xlsx"
+//       var wb = xlsx.readFile(dataPathExcelToRead)
+//       var sheetName = wb.SheetNames[0]
+//       var sheetValue = wb.Sheets[sheetName]
+//       var htmlData = xlsx.utils.sheet_to_html(sheetValue)
+//       fs.writeFile('excelToHtml.html',htmlData,function(err){
+//           console.log("Data is successfully converted")
+//       })
+//       await page.waitForTimeout(3000)
+//       await page.goto('C:/Users/Azhar/Desktop/Puppeteer%20Project/excelToHtml.html',{"waitUntil":"networkidle2"}).catch(function(){
+//           console.log("Error while loading the file")
+//       })
+//       await page.waitForTimeout(3000)
+//       await page.pdf({path:'./ExcelToPDF.pdf',format:'A4',printBackground:true});
+//       await browser.close()
+//   });
+// });
+
+// app.get('/pdf3', (req, res) => {//버튼 id pdfmake 발생시 행동할 이벤트
+        
+//     /* documentDefinition : pdf파일에 들어갈 내용 및 여러가지를 정의 */
+//     var documentDefinition = {
+        
+//         //content : pdf의 내용을 정의 
+//         content: [
+//             {
+//                 text: 'First paragraph'
+//             }, // 스타일 적용 없이 그냥 출력
+//             {
+//                 text: 'Another paragraph, this time a little bit longer to make sure, this line will be divided into at least two lines',
+//                 bold: true
+//             }, // 텍스트에 bold 주기
+//             {
+//                 text: '가나다라마바사아자타카타파하',
+//                 style: 'style_test'
+//             }, // style 부분에 정의된 style_test 적용해보기 및 한글 꺠짐 테스트 
+//             {
+//                 style: 'tableExample',
+//                 table: {
+//                     widths: [100, '*', 200, '*'],
+//                     body: [
+//                         ['width=100', 'star-sized', 'width=200', 'star-sized'],
+//                         ['fixed-width cells have exactly the specified width', {
+//                             text: 'nothing interesting here',
+//                             italics: true,
+//                             color: 'gray'
+//                         }, {
+//                             text: 'nothing interesting here',
+//                             italics: true,
+//                             color: 'gray'
+//                         }, {
+//                             text: 'nothing interesting here',
+//                             italics: true,
+//                             color: 'gray'
+//                         }]
+//                     ]
+//                 }
+//             }//테이블 그리기 
+//         ],
+//         //하단의 현재페이지 / 페이지 수 넣기 
+//         footer: function (currentPage, pageCount) {
+//             return {
+//                 margin: 10,
+//                 columns: [{
+//                     fontSize: 9,
+//                     text: [{
+//                             text: '--------------------------------------------------------------------------' +
+//                                 '\n',
+//                             margin: [0, 20]
+//                         },
+//                         {
+//                             text: '' + currentPage.toString() + ' of ' +
+//                                 pageCount,
+//                         }
+//                     ],
+//                     alignment: 'center'
+//                 }]
+//             };
+
+//         },
+//         //필요한 스타일 정의하기 
+//         styles: {
+//             style_test: {
+//                 fontSize: 18,
+//                 bold: true,
+//                 margin: [0, 0, 0, 0],
+//                 alignment: 'center'
+//             },
+//             tableExample: {
+//                 margin: [0, 5, 0, 15]
+//             }
+//         },
+
+//         // 페이지 크기 용지의 크기 사이즈 넣기 또는 특정 사이즈 넣기 { width: number, height: number }
+//         pageSize: 'A4',
+
+//         /* 페이지 방향 portrait : 가로 , landscape : 세로 */
+//         pageOrientation: 'portrait',
+//     };
+
+//     var pdf_name = 'pdf파일 만들기.pdf'; // pdf 만들 파일의 이름 
+//     pdfMake.createPdf(documentDefinition).download(pdf_name);
+//   });
