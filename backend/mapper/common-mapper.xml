@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="conf">  
+  <select id="selectConf">
+    SELECT 
+      * FROM TB_CONFIG
+      WHERE
+        1=1
+        AND DEL_YN='N'
+        <if test = "(filterName != null AND filterName != '') AND (filterValue != null AND filterValue != '')">
+        AND #{filterName} LIKE '%' + #{filterValue} + '%'
+        </if>
+      ORDER BY #{sortBy} #{descendingFinal}
+      OFFSET #{startRow} rows
+      FETCH NEXT #{rowsPerPage} rows only
+  </select>
+</mapper>
+
