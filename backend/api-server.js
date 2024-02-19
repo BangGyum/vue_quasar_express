@@ -148,6 +148,28 @@ app.post("/api/deleteCode", async (req, res) => {
 });
 
 
+app.post("/api/delYnChange", async (req, res) => {
+  console.log(req.body.param);
+  let paramData = req.body.param;
+
+  const sql = `UPDATE TB_CONFIG  
+              SET 
+                DEL_YN = '${paramData.delYn}'
+              WHERE 
+                1=1
+                AND CODE_ID = '${paramData.codeId}'
+                AND CODE_VALUE = '${paramData.codeValue}'
+  `
+  try {
+    configUpdate(sql);
+    res.send('성공');
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Server error');
+  }
+});
+
+
 app.post("/api/deleteCode", async (req, res) => {
   console.log(req.body.param);
   let paramData = req.body.param;
@@ -222,12 +244,13 @@ app.post('/api/data', async (req, res) => {
   filterQuery = `AND ${filterName} LIKE '%${filterValue}%'`;
   }
   try {
+    //AND DEL_YN='N'
     const result = await executeSelectQuery(
       `SELECT 
       * FROM TB_CONFIG
       WHERE
         1=1
-        AND DEL_YN='N'
+        
         ${filterQuery}
       ORDER BY ${sortBy} ${descendingFinal}
       OFFSET ${startRow} rows
