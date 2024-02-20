@@ -246,8 +246,9 @@ app.post('/api/data', async (req, res) => {
   try {
     //AND DEL_YN='N'
     const result = await executeSelectQuery(
-      `SELECT 
-      * FROM TB_CONFIG
+      `SELECT ROW_NUMBER() OVER (ORDER BY ${sortBy} ${descendingFinal}) AS RowNum
+        , *
+      FROM TB_CONFIG
       WHERE
         1=1
         
@@ -262,7 +263,7 @@ app.post('/api/data', async (req, res) => {
     res.status(500).send('Server error');
   }
 });
-//여기에 검색 조건으로 filterColName과 filterColValue 가 들어올건데, 그걸 반복문으로 where절에 어떻게 넣으면 좋을까 
+//위와같이 페이징 처리하는데 index+1 (번호부여) 해서 번호매기는건 조건생각했을때 따로 쿼리를 불러야하나?
 
 function executeSelectQuery(sql) {
   console.log(sql);
