@@ -23,55 +23,19 @@ connection.connect();
 
 app.use(express.json());
 
-const codeList = [{name : "공통코드1", id : "1"}
-                 ,{name : "공통코드2", id : "2"}];
-codeList.push({name : "공통코드3", id : 3})
-
-const codeObject = [
-  {
-  name : "메뉴",
-  code : "menu", 
-  },
-  {
-  name : "권한",
-  code : "auth",
-  },
-]
-
-app.get('/api/', (req, res) => {
-  res.send('Hello World!');
-})
-
-app.post('/api/codeObject', (req, res) => {
-  
-  res.send(codeObject);
-})
-
-app.post('/api/codeList', (req, res) => {
-  
-  res.send(codeList);
-})
-
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`)
 })
 
 //테스트 확인
-app.post("/api/saveCode/:idx", (req, res) => {
+app.post("/api/insert", (req, res) => {
   let paramData = req.body.param;
   createTransaction(paramData.codeId
                     ,paramData.codeValue
                     ,paramData.codeName
                     ,paramData.codeDesc
                     ,paramData.craeteId);
-  res.send(req.params.idx);
-});
-
-app.post("/api/getConfig/:idx", (req, res) => {
-  let paramData = req.body.testParam;
-  selectEach(paramData.codeId
-            ,paramData.codeValue);
-  res.send(req.params.idx);
+  res.send('성공');
 });
 
 function createTransaction(codeId,codeValue,codeName,codeDesc,craeteId) { //insert
