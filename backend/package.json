@@ -21,5 +21,11 @@
     "pdfmake": "^0.2.9",
     "puppeteer": "^22.0.0",
     "tedious": "^16.6.1"
+  },
+  "imports": {
+    "#express/*": "./express/*",
+    "#controller/*": "./express/controller/*",
+    "#service/*": "./express/service/*",
+    "#mapper/*": "./express/mapper/*"
   }
 }
