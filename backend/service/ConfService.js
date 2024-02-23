@@ -8,6 +8,9 @@ class ConfService {
   constructor(namespace) {
     console.log("constructor: conf");
   }
+  loadNamespace() {
+    mapper.setNamespace("conf");
+  }
 
   async getConfList() {
     this.loadNamespace();
@@ -21,9 +24,7 @@ class ConfService {
     return result;
   }
 
-  loadNamespace() {
-    mapper.setNamespace("conf");
-  }
+
 }
 
 module.exports = ConfService;

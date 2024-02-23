@@ -4,8 +4,8 @@ const app = express();
 const ConfService = require("../service/confService.js");
 const service = new ConfService();
 
-app.get("/menus/tree", async (req, res) => {
-  console.log("controller");
+app.get("/api/conf/list", async (req, res) => {
+  console.log("/api/conf/list");
 
   /*
   const query = await poolPromise;

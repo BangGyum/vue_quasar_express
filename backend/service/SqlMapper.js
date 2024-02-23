@@ -14,7 +14,7 @@ module.exports = {
   setNamespace(namespace) {
     this.namespace = namespace;
   },
-  getSql() {
+  getSql() { //sql 생성,반환
     let sqlId = "";
     let param = {};
     let format = {};
