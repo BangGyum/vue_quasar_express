@@ -1,4 +1,4 @@
-const { connection } = require("../dbConnect.js"); //databasePool로 
+const { databasePool } = require("../dbConnect.js"); //databasePool로 
 //const mapper = require("./SqlMapper");
 //const sqlMapper = require("#service/SqlMapper.js");
 //const mapper = new SqlMapper();
@@ -10,7 +10,7 @@ class ConfService {
   }
 
   async getConfList() {
-    const result = this.selectQuery("selectConfList"); //select id 값
+    const result = this.selectQuery("selectConfList"); //xmlselect id 값
     return result;
   }
 
@@ -20,7 +20,7 @@ class ConfService {
   }
 
   async executeQuery(query) {
-    const pool = await connection;
+    const pool = await databasePool;
     const result = await pool.request().query(query);
     return result;
   }

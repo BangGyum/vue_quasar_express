@@ -3,20 +3,17 @@ const app = express();
 
 const config = require('./db_config').config; //db정보는 따로 빼놓음.
 
-var connection = new Connection(config);  
-connection.on('connect', function(err) {
-  if (err) {
-      console.log(err);
-  } else {
-      console.log("Connected");  
-      // let a = executeStatement();
-      // console.log(a);
-  }
-});
 
-connection.connect();
+const databasePool = new sql.ConnectionPool(config)
+  .connect()
+  .then((pool) => {
+    console.log("Connected to MSSQL");
+    return pool;
+  })
+  .catch((err) => console.log("Database Connection Failed! Bad Config: ", err));
+
 
 module.exports = {
-    connection
+    databasePool
     ,sql
 }

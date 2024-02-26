@@ -1,4 +1,4 @@
-var config = {  
+const config = {  
     server: '192.168.37.3',  //update me
     authentication: {
         type: 'default',
