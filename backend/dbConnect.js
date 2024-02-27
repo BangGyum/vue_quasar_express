@@ -1,5 +1,6 @@
-const { Connection, TYPES } = require('tedious'); //mssql 사용을 위해
-const app = express();
+// const { Connection, TYPES } = require('tedious'); //mssql 사용을 위해
+// const app = express();
+const sql = require("mssql");
 
 const config = require('./db_config').config; //db정보는 따로 빼놓음.
 

@@ -1,8 +1,8 @@
-const { databasePool } = require("../dbConnect.js"); //databasePool로 
+const { databasePool } = require("#express/db-amifeed.js");
 //const mapper = require("./SqlMapper");
 //const sqlMapper = require("#service/SqlMapper.js");
 //const mapper = new SqlMapper();
-const mapper = require("./SqlMapper.js");
+const mapper = require("#service/SqlMapper.js");
 
 class ConfService {
   constructor(namespace) {
@@ -10,7 +10,7 @@ class ConfService {
   }
 
   async getConfList() {
-    const result = this.selectQuery("selectConfList"); //xmlselect id 값
+    const result = this.selectList("selectConfList", {});
     return result;
   }
 
@@ -25,18 +25,35 @@ class ConfService {
     return result;
   }
 
-  async selectQuery(mapperId) {
+  async selectList(mapperId, params) {
     this.loadNamespace();
-    const query = mapper.getSql(mapperId);
-    const result = await this.executeQuery(query);
-    console.log("selectQuery", query);
+    const query = mapper.getSql(mapperId, params);
+    console.log("query", query);
+    const result = await this.executeQuery(query).then(
+      (resultObj) => resultObj.recordset
+    );
+
+    //const util = require("util");
+    //console.log("result", util.inspect(result, false, null));
+
     return result;
   }
 
-  async selectQueryWithParms(mapperId, params) {
+  async select(mapperId, params) {
     this.loadNamespace();
     const query = mapper.getSql(mapperId, params);
-    const result = await this.executeQuery(query);
+    const result = await this.executeQuery(query).then((resultObj) => {
+      let value = "";
+      const firstRecordset = resultObj.recordset[0];
+      for (let key in firstRecordset) {
+        value = firstRecordset[key];
+        break;
+      }
+      return value;
+    });
+
+    //const util = require("util");
+    //console.log("result", util.inspect(result, false, null));
 
     return result;
   }
