@@ -1,62 +1,90 @@
 const { databasePool } = require("#express/db-amifeed.js");
-//const mapper = require("./SqlMapper");
-//const sqlMapper = require("#service/SqlMapper.js");
+const mapper = require("./SqlMapper");
+//const SqlMapper = require("#service/SqlMapper.js");
 //const mapper = new SqlMapper();
-const mapper = require("#service/SqlMapper.js");
 
 class ConfService {
-  constructor(namespace) {
-    console.log("constructor: conf");
+  constructor() {
+    this.mapper = new SqlMapper();
+    this.mapper.setNamespace("work");
   }
 
-  async getConfList() {
-    const result = this.selectList("selectConfList", {});
-    return result;
-  }
+  async selectWorkList(params) {
+    const { page, rowsPerPage } = params;
+    let result = {};
 
-  loadNamespace() {
-    // 네임스페이스 세팅
-    mapper.setNamespace("conf");
-  }
+    const workCount = (await this.mapper.select("selectCountAllWork")).CNT ?? 0;
 
-  async executeQuery(query) {
-    const pool = await databasePool;
-    const result = await pool.request().query(query);
-    return result;
-  }
-
-  async selectList(mapperId, params) {
-    this.loadNamespace();
-    const query = mapper.getSql(mapperId, params);
-    console.log("query", query);
-    const result = await this.executeQuery(query).then(
-      (resultObj) => resultObj.recordset
-    );
-
-    //const util = require("util");
-    //console.log("result", util.inspect(result, false, null));
-
-    return result;
-  }
-
-  async select(mapperId, params) {
-    this.loadNamespace();
-    const query = mapper.getSql(mapperId, params);
-    const result = await this.executeQuery(query).then((resultObj) => {
-      let value = "";
-      const firstRecordset = resultObj.recordset[0];
-      for (let key in firstRecordset) {
-        value = firstRecordset[key];
-        break;
-      }
-      return value;
+    Object.assign(params, {
+      firstRow: (page - 1) * rowsPerPage + 1,
+      lastRow: page * rowsPerPage,
     });
 
-    //const util = require("util");
-    //console.log("result", util.inspect(result, false, null));
+    const workList = await this.mapper.selectList("selectWorkList", params);
+    const lastPage = Math.ceil(Number(workCount) / rowsPerPage);
 
+    result = {
+      rows: workList,
+      meta: {
+        currentPage: params.page,
+        lastPage: lastPage ?? 0,
+        totalRow: workCount ?? 0,
+      },
+    };
+
+    return result;
+  }
+  async saveWorkList(params) {
+    let result = {};
+    let rowStatus = "";
+    console.log("saveWorks", params);
+
+    const connection = await this.mapper.getConnection();
+    const transaction = new sql.Transaction(connection);
+    try {
+      await transaction.begin();
+
+      const request = new sql.Request(transaction);
+
+      for (let item of params) {
+        rowStatus = item.flag;
+        if (rowStatus === "+") {
+          // 행 추가
+          await this.mapper.insert(request, "insertWork", item);
+        } else if (rowStatus === "*") {
+          // 행 수정
+          await this.mapper.update(request, "updateWork", item);
+        } else if (rowStatus === "-") {
+          // 행 삭제
+          await this.mapper.update(request, "deleteWork", item);
+        }
+      }
+
+      await transaction.commit();
+    } catch (e) {
+      await transaction.rollback();
+      throw e;
+    } finally {
+      //await connection.close();
+    }
+
+    return result;
+  }
+
+  async getWorkDateList() {
+    const result = this.mapper.selectList("selectWorkDateList");
+    return result;
+  }
+
+  async getWorkPlantList(params) {
+    console.log("params", params);
+    const result = this.mapper.selectList("selectWorkPlantList", params);
+    return result;
+  }
+
+  async getWorkList(params) {
+    const result = this.mapper.selectList("getWorkList", params);
     return result;
   }
 }
-
 module.exports = ConfService;
