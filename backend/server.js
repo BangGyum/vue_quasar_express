@@ -1,24 +1,55 @@
-// // mssql 객체 생성
-// const sql = require('mssql');
+const express = require("express");
+const session = require("express-session");
+const logger = require("morgan");
 
-// // DB 연결 설정
-// const config = {
-//   user: 'ainframework_sa',
-//   password: 'ani@64306000',
-//   server: '192.168.37.3:1433',
-//   database: 'AINFRAMEWORK',
-//   encrypt: false, // IP address access
-//   trustServerCertificate: true, // Trust self-signed certificate
-// };
+const bodyParser = require("body-parser");
 
-// // DB 연결
-// sql.connect(config, err => {
-//   if (err) {
-//     console.error('Error connecting to database:', err);
-//     return;
-//   }
-//   console.log('Connected to database!');
-// });
+const MenuController = require("./controller/MenuController.js");
+const WorkController = require("./controller/WorkController.js");
+const PlantController = require("./controller/PlantController.js");
+const NutritionController = require("./controller/NutritionController.js");
+const FeedController = require("./controller/FeedController.js");
+const PrintController = require("./controller/PrintController.js");
 
-// // DB 모듈화
-// module.exports = { sql };
+//로그인
+const loginController = require("./controller/LoginController.js");
+
+const app = express();
+const port = 3000;
+
+const prefixUrl = "/api";
+
+app.use(logger("dev"));
+
+// 세션 설정
+app.use(
+  session({
+    secret: "amifeed!234@@",
+    resave: false,
+    saveUninitialized: true,
+  })
+);
+
+// 로그인 체크
+
+// 화면 전환 시 세션 체크
+
+app.listen(port, () => {
+  console.log(`app listening on port ${port}`);
+});
+
+// parse application/x-www-form-urlencoded
+app.use(bodyParser.urlencoded({ extended: false }));
+
+// parse application/json
+app.use(bodyParser.json());
+
+app.use(`${prefixUrl}`, MenuController);
+app.use(`${prefixUrl}`, WorkController);
+app.use(`${prefixUrl}`, PlantController);
+app.use(`${prefixUrl}`, NutritionController);
+app.use(`${prefixUrl}`, FeedController);
+app.use(`${prefixUrl}`, PrintController);
+
+//로그인
+app.use(`${prefixUrl}`, loginController);
